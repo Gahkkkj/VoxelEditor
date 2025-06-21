@@ -54,17 +54,11 @@ Para compilar este projeto, você precisará de um compilador C++ moderno e do C
 
 Recomendamos o uso do CMake para gerar os arquivos de build para a sua plataforma.
 
-1.  **Clone o repositório:**
 
-    ```bash
-    git clone https://github.com/seu-usuario/seu-repositorio.git
-    cd seu-repositorio
-    ```
-
-2.  **Configure as dependências:**
+1.  **Configure as dependências:**
     Certifique-se de que o CMake consiga encontrar as bibliotecas `GLAD`, `GLFW` e `GLM`. A forma mais fácil é colocá-las em uma pasta `libs` dentro do projeto ou usar um gerenciador de pacotes como o `vcpkg`.
 
-3.  **Execute o CMake para gerar o build:**
+2.  **Execute o CMake para gerar o build:**
 
     ```bash
     mkdir build
@@ -72,7 +66,7 @@ Recomendamos o uso do CMake para gerar os arquivos de build para a sua plataform
     cmake ..
     ```
 
-4.  **Compile o projeto:**
+3.  **Compile o projeto:**
 
     ```bash
     cmake --build .
@@ -84,7 +78,7 @@ Recomendamos o uso do CMake para gerar os arquivos de build para a sua plataform
     make
     ```
 
-5.  **Execute:**
+4.  **Execute:**
     O arquivo executável será gerado dentro da pasta `build`.
 
 ## 🎮 Como Usar
@@ -116,15 +110,8 @@ O projeto foi desenvolvido com uma abordagem procedural, focando na clareza e na
   * **Gerenciamento de Estado:** Variáveis globais como `menuAberto` e `modoDesenho` controlam o estado atual da aplicação, garantindo que os inputs de teclado e mouse se comportem de maneira diferente em cada contexto (navegação, menu, desenho).
   * **Raycasting:** A seleção por mouse no modo de desenho é feita com uma função de *raycasting* que converte as coordenadas 2D do mouse para um raio 3D no espaço do mundo. Uma simples "marcha de raio" (Ray Marching) avança ao longo desse raio para detectar qual voxel é interceptado.
 
-## 🔮 Possíveis Melhorias Futuras
-
-  * **Otimização de Renderização:** Implementar técnicas como *Chunking* e *Greedy Meshing* para reduzir drasticamente o número de chamadas de desenho e renderizar mundos muito maiores.
-  * **Interface Gráfica Avançada:** Substituir o HUD e o menu atuais por uma biblioteca de GUI como a **Dear ImGui**.
-  * **Ferramentas de Edição:** Adicionar "pincéis" de diferentes tamanhos para desenhar ou apagar múltiplos voxels de uma vez.
-  * **Sons:** Integrar uma biblioteca de áudio (como OpenAL ou irrKlang) para adicionar feedback sonoro às ações.
-
 ## 👥 Autores
 
-  * **[Seu Nome Completo]**
-  * **[Nome Completo do Colega]**
+  * **[Gabriel da Silva Pereira]**
+  * **[Raphael Frey Machado]**
 
