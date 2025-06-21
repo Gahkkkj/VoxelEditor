@@ -3,8 +3,6 @@
 
 Bem-vindo ao repositório do nosso Editor de Voxel 3D\! Este projeto foi desenvolvido como trabalho final para a disciplina de Computação Gráfica e consiste em uma aplicação interativa onde o usuário pode criar, destruir e modificar um mundo composto por blocos, ou voxels. A aplicação foi construída do zero utilizando C++ e a API gráfica moderna OpenGL.
 
-*(Sugestão: Grave um GIF curto mostrando as funcionalidades e substitua o link acima)*
-
 ## ✨ Funcionalidades
 
 O editor conta com um conjunto robusto de funcionalidades, divididas em diferentes modos de interação:
