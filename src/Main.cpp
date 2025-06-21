@@ -9,12 +9,13 @@
 
 using namespace std;
 
+//Controlam o que o programa está fazendo no momento: menu aberto, modo de desenho, etc.
+//São a base para o gerenciamento dos diferentes modos de interação.
 bool menuAberto = false;
 int menuSelecao = -1;
 int menuBotaoPressionado = -1;
 bool modoDesenho = false;
 int corDesenhoAtual = 1;
-
 int ultimoSelecaoX = 0;
 int ultimoSelecaoY = 0;
 int ultimoSelecaoZ = 0;
@@ -60,6 +61,8 @@ glm::vec4 colorList[] = {
     {1.0f, 0.0f, 1.0f, 1.0f}
 };
 
+//O Vertex Shader posiciona os vértices do nosso cubo no espaço 3D.
+//O Fragment Shader pinta os pixels desse cubo com uma cor sólida.
 const GLchar *vertexShaderSource = R"glsl(
 #version 450
 layout(location = 0) in vec3 position;
@@ -80,6 +83,7 @@ void main() {
 }
 )glsl";
 
+//Percorrem toda a matriz 'grid' e escrevem/leem as informações de cada voxel em um arquivo de texto, permitindo salvar e carregar o progresso.
 void salvarGradeVoxel(const std::string &nomeArquivo)
 {
     std::ofstream arquivo(nomeArquivo);
@@ -145,6 +149,9 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+//Chamada continuamente quando o mouse se move.
+//Sua única função é calcular o deslocamento do mouse para girar a câmera.
+//É desativada se o menu ou o modo de desenho estiverem ativos.
 void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 {
     if (menuAberto || modoDesenho) return;
@@ -180,6 +187,7 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos)
     cameraUp = glm::normalize(glm::cross(right, cameraFront));
 }
 
+//Chamada quando a roda de rolagem do mouse é usada, para controlar o zoom.
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
     if (menuAberto) return;
@@ -189,6 +197,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
     if (fov >= 120.0f) fov = 120.0f;
 }
 
+//Executa a ação do botão do menu que foi selecionado.
 void ativarOpcaoMenu() {
     if (menuSelecao == -1) return;
     switch (menuSelecao) {
@@ -207,6 +216,9 @@ void ativarOpcaoMenu() {
 void inicializarGradeVoxel(int tamanho);
 void reiniciarGradeVoxel(int novoTamanho);
 
+//Esta função é chamada toda vez que uma tecla é pressionada.
+//Ela gerencia todos os atalhos do teclado.
+// A função usa as variáveis de estado (menuAberto, modoDesenho) para decidir quais ações permitir.
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -310,6 +322,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_C && action == GLFW_PRESS){if(selecaoX!=-1){int corAtual = grid[selecaoY][selecaoX][selecaoZ].corPos;if (corAtual < 5){corAtual++;}else{corAtual = 0;}mudouCor = true;grid[selecaoY][selecaoX][selecaoZ].corPos = corAtual;grid[selecaoY][selecaoX][selecaoZ].visivel = true;}}
 }
 
+//Processa a movimentação da câmera com WASD.
 void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -348,6 +361,7 @@ void transformaObjeto(float xpos, float ypos, float zpos, float xrot, float yrot
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(transform));
 }
 
+//Compila os códigos fonte dos shaders (Vertex e Fragment) e os linka em um programa de shader.
 GLuint setupShader()
 {
     GLint success;
@@ -385,6 +399,8 @@ GLuint setupShader()
     return shaderProgram;
 }
 
+//Cria a geometria de um único cubo, que será reutilizado para desenhar todos os voxels.
+//Envia os vértices para a GPU (VBO) e configura como eles devem ser lidos (VAO).
 GLuint setupGeometry()
 {
     GLfloat vertices[] = {
@@ -414,6 +430,7 @@ void setColor(GLuint shaderID, glm::vec4 cor)
     glUniform4f(loc, cor.r, cor.g, cor.b, cor.a);
 }
 
+//Aloca a memória para a matriz 3D 'grid' e inicializa cada voxel com valores padrão (invisível, cor cinza, etc.).
 void inicializarGradeVoxel(int tamanho)
 {
     TAM = tamanho;
@@ -442,6 +459,9 @@ void inicializarGradeVoxel(int tamanho)
     }
 }
 
+//Permite mudar o tamanho do mundo em tempo de execução.
+//Primeiro, ela libera toda a memória da grade antiga para evitar vazamentos.
+//Depois, chama a 'inicializarGradeVoxel' para criar uma nova grade com o novo tamanho.
 void reiniciarGradeVoxel(int novoTamanho)
 {
     if (grid != nullptr)
@@ -470,6 +490,11 @@ void reiniciarGradeVoxel(int novoTamanho)
     cout << "Grade reiniciada com tamanho: " << novoTamanho << "x" << novoTamanho << "x" << novoTamanho << endl;
 }
 
+//Esta é a função de Raycasting
+//Pega as coordenadas 2D do mouse na tela.
+//Converte essas coordenadas em um raio 3D que "sai" da câmera na direção do cursor.
+//No momento em que o raio encontra um bloco visível, a função sabe qual bloco o usuário está mirando.
+//Com base nisso, ela atualiza a variável 'selecaoX,Y,Z' para que o contorno visual apareça no lugar certo para criar ou apagar um bloco.
 void atualizarSelecaoComMouse()
 {
     glm::mat4 proj = glm::perspective(glm::radians(fov), (float)WIDTH / HEIGHT, 0.1f, 1000.0f);
@@ -540,7 +565,8 @@ void atualizarSelecaoComMouse()
     }
 }
 
-
+//Desenha a interface 2D (HUD) da paleta de cores.
+//Usa uma projeção ortográfica para desenhar elementos 2D sobre a cena 3D.
 void renderHUD(GLuint shaderID, GLuint VAO, const Voxel& selectedVoxel)
 {
     GLboolean depthTestEnabled;
@@ -563,7 +589,8 @@ void renderHUD(GLuint shaderID, GLuint VAO, const Voxel& selectedVoxel)
     {
         float currentX = startX + (i-1) * (quadSize + padding);
         
-        bool isCurrentDrawingColor = (i == corDesenhoAtual);
+        bool isCurrentDrawingColor = (modoDesenho && i == corDesenhoAtual);
+        
         bool isSelectedBlockColor = (!modoDesenho && i == selectedVoxel.corPos);
 
         if (isCurrentDrawingColor || isSelectedBlockColor)
@@ -587,6 +614,9 @@ const glm::vec4 btnSalvarRect(WIDTH / 2.0f - 100.0f, HEIGHT / 2.0f + 30.0f, 200.
 const glm::vec4 btnCarregarRect(WIDTH / 2.0f - 100.0f, HEIGHT / 2.0f - 30.0f, 200.0f, 50.0f);
 const glm::vec4 btnSairRect(WIDTH / 2.0f - 100.0f, HEIGHT / 2.0f - 90.0f, 200.0f, 50.0f);
 
+//Desenha a interface 2D do menu de pausa (Salvar, Carregar, Sair).
+//Assim como o HUD, usa projeção ortográfica.
+//Também exibe o destaque de seleção (hover) e o efeito de clique.
 void renderMenu()
 {
     GLboolean depthTestEnabled;
@@ -650,6 +680,7 @@ void renderMenu()
     if (depthTestEnabled) glEnable(GL_DEPTH_TEST);
 }
 
+//Chamada quando um botão do mouse é clicado.
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (menuAberto) {
@@ -681,9 +712,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
 }
 
-
 int main()
 {
+    //Configura o GLFW, cria a janela, carrega o GLAD, compila os shaders
+    //e cria a geometria do nosso "cubo modelo" que será usado para desenhar todos os voxels.
     glfwInit();
     window = glfwCreateWindow(WIDTH, HEIGHT, "Voxel Editor", nullptr, nullptr);
     glfwMakeContextCurrent(window);
@@ -712,12 +744,14 @@ int main()
     ultimoSelecaoZ = selecaoZ = TAM - 1;
     grid[selecaoY][selecaoX][selecaoZ].selecionado = true;
 
+    //Loop Principal
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         
+        //Verifica se o menu está aberto ou se o modo de desenho está ativo para decidir quais ações são permitidas.
         if (!menuAberto && !modoDesenho)
         {
             processInput(window);
@@ -746,27 +780,33 @@ int main()
             }
         }
         
+        //Se estiver no modo de desenho, chama 'atualizarSelecaoComMouse()' pra que o seletor siga o cursor.
         if (modoDesenho && !menuAberto)
         {
             atualizarSelecaoComMouse();
         }
         
+        //Limpa a tela.
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(shaderID);
 
+        //Configura as matrizes de câmera (view e proj).
         especificaVisualizacao();
         especificaProjecao();
 
         glBindVertexArray(VAO);
 
+        //Desenha a caixa de contorno do mundo.
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         setColor(shaderID, glm::vec4(1.0f, 1.0f, 1.0f, 0.1f));
         transformaObjeto(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, TAM, TAM, TAM);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        //Entra em um grande laço 'for' que percorre toda a grade 3D.
+        //Para cada voxel 'visivel', ele envia a posição e cor do voxel para os shaders
         for (int x = 0; x < TAM; x++)
         {
             for (int y = 0; y < TAM; y++)
@@ -791,6 +831,7 @@ int main()
             }
         }
         
+        //Desenha a Interface: Por último, desenha o Menu ou o HUD por cima de tudo.
         if (menuAberto)
         {
             renderMenu();
@@ -805,10 +846,12 @@ int main()
             }
         }
         
+        //Troca os Buffers: Mostra na tela o que foi desenhado.
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    //Libera os recursos alocados e termina o programa de forma limpa.
     glDeleteVertexArrays(1, &VAO);
     glfwTerminate();
     return 0;
