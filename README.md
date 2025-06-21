@@ -1,3 +1,9 @@
+## 👥 Autores
+
+  * **[Gabriel da Silva Pereira]**
+  * **[Raphael Frey Machado]**
+
+
 
 # 🎨 Editor de Voxel em C++ e OpenGL
 
@@ -108,8 +114,4 @@ O projeto foi desenvolvido com uma abordagem procedural, focando na clareza e na
   * **Gerenciamento de Estado:** Variáveis globais como `menuAberto` e `modoDesenho` controlam o estado atual da aplicação, garantindo que os inputs de teclado e mouse se comportem de maneira diferente em cada contexto (navegação, menu, desenho).
   * **Raycasting:** A seleção por mouse no modo de desenho é feita com uma função de *raycasting* que converte as coordenadas 2D do mouse para um raio 3D no espaço do mundo. Uma simples "marcha de raio" (Ray Marching) avança ao longo desse raio para detectar qual voxel é interceptado.
 
-## 👥 Autores
-
-  * **[Gabriel da Silva Pereira]**
-  * **[Raphael Frey Machado]**
 
